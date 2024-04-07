@@ -4,7 +4,7 @@ import React from 'react'
 function RootPage() {
     return (
         <div>
-            <UserButton afterSignOutUrl='/'/>
+      
         </div>
     )
 }
