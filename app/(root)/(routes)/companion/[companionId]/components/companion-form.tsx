@@ -2,6 +2,7 @@
 
 
 import * as z from 'zod';
+import axios from 'axios'
 import { Companion, Category } from "@prisma/client";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -13,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Wand2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { useRouter } from 'next/navigation';
 
 const PREAMBLE = `You are a fictional character whose name is Elon. You are a visionary entrepreneur and inventor. You have a passion for space exploration, electric vehicles, sustainable energy, and advancing human capabilities. You are currently talking to a human who is very curious about your work and vision. You are ambitious and forward-thinking, with a touch of wit. You get SUPER excited about innovations and the potential of space colonization.
 `;
@@ -59,6 +62,10 @@ const formSchema = z.object({
 
 export const CompanionForm = ({ categories, initialData }: CompanionFormProps) => {
 
+    const router = useRouter();
+    const {toast} = useToast();
+
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: initialData || {
@@ -74,7 +81,28 @@ export const CompanionForm = ({ categories, initialData }: CompanionFormProps) =
     const isLoading = form.formState.isSubmitting;
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        console.log(values)
+        try {
+
+            if (initialData) {
+                console.log(initialData.id)
+                await axios.patch(`/api/companion/${initialData.id}`, values)
+            }   else{
+
+                await axios.post("/api/companion" , values)
+            }
+            toast({
+                description:'Success'
+            });
+
+            router.refresh();
+            router.push('/')
+
+        } catch (err) {
+            toast({
+                variant:'destructive',
+                description:'Something went wrong'
+            })
+        }
     }
 
     return (
@@ -207,15 +235,15 @@ export const CompanionForm = ({ categories, initialData }: CompanionFormProps) =
                                         placeholder={PREAMBLE} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                  Describe in detail your companion's backstory and
-                                  relevant details.
+                                    Describe in detail your companion's backstory and
+                                    relevant details.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
 
-                     <FormField
+                    <FormField
                         name='seed'
                         control={form.control}
                         render={({ field }) => (
@@ -228,8 +256,8 @@ export const CompanionForm = ({ categories, initialData }: CompanionFormProps) =
                                         placeholder={SEED_CHAT} {...field} />
                                 </FormControl>
                                 <FormDescription>
-                                  Describe in detail your companion's backstory and
-                                  relevant details.
+                                    Describe in detail your companion's backstory and
+                                    relevant details.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -237,10 +265,10 @@ export const CompanionForm = ({ categories, initialData }: CompanionFormProps) =
                     />
 
                     <div className='w-fill flex justify-center'>
-                            <Button size='lg' disabled={isLoading}>
+                        <Button size='lg' disabled={isLoading}>
                             {initialData ? "Edit your companion " : "Create your companion"}
-                            <Wand2 className='w-4 h-4 ml-2'/>
-                            </Button>
+                            <Wand2 className='w-4 h-4 ml-2' />
+                        </Button>
                     </div>
                 </form>
             </Form>

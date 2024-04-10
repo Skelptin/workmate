@@ -23,7 +23,7 @@ const CompanionIdPage = async ({ params }: CompanionIdPageProps) => {
     return (
        
         <CompanionForm
-            initialdata={companion}
+            initialData={companion}
             categories={categories}
         />
     );
