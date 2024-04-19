@@ -25,7 +25,7 @@ model Category {
 model Companion {
   id            String @id @default(uuid())
   userId        String
-  userName      String
+  userName      String 
   src           String
   name          String @db.Text
   description   String
@@ -39,6 +39,28 @@ model Companion {
   categoryId String
 
 
-  @@index([categoryId])
+messages  Message[]
 
+  @@index([categoryId])
+ 
+}
+
+enum Role{
+  user
+  system
+}
+
+model Message {
+  id String @id @default(uuid())
+  role Role
+  content String @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companionId String
+  userId String
+
+  Companion     Companion @relation(fields:[companionId] , references:[id] , onDelete:Cascade)
+
+  @@index([companionId])
 }
